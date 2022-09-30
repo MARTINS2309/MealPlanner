@@ -1,4 +1,4 @@
-export const appData = {
+export let appData = {
   catelogData: {
     ingredientsById: {
       milk: {

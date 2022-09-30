@@ -1,5 +1,5 @@
 import * as m from "./model";
-import { appData } from "./data";
+import { appData } from "./data.js";
 
 describe("model", () => {
   describe("getters", () => {

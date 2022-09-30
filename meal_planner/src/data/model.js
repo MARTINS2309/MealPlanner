@@ -1,4 +1,5 @@
-const fp = require("lodash/fp");
+import fp from "lodash/fp.js";
+import { appData } from "./data";
 const _ = fp.convert({
   cap: false,
   curry: false,
@@ -105,3 +106,51 @@ export const isAdmin = (userManagementData, email) => {
 export const isEditor = (userManagementData, email) => {
   return _.get(userManagementData, ["usersById", email, "isEditor"]) == true;
 };
+
+export const addUserUM = (userManagementData, user) => {
+  let email = _.get(user, "email");
+  let infoPath = ["usersById", email];
+  if (_.has(userManagementData, infoPath)) {
+    throw "User already exists";
+  }
+  let nextUserManagementData = _.set(userManagementData, infoPath, user);
+  return nextUserManagementData;
+};
+
+export const addUserAD = (appData, user) => {
+  let currentUserManagementData = _.get(appData, "userManagementData");
+  let nextUserManagementData = addUserUM(currentUserManagementData, user);
+  let nextAppData = _.set(
+    appData,
+    "userManagementData",
+    nextUserManagementData
+  );
+  return nextAppData;
+};
+
+export const addUserSys = (user) => {
+  let previous = SystemState.get();
+  let next = addUserAD(previous, user);
+  SystemState.commit(previous, next);
+};
+
+class SystemState {
+  systemState;
+  previousSystemState;
+
+  get() {
+    return this.systemState;
+  }
+  commit(previous, next) {
+    let systemStateBeforeUpdate = this.systemState;
+    if (!Consitancy.validate(previous, next)) {
+      throw "System data to be commited is not valid";
+    }
+    this.systemState = next;
+    this.previousSystemState = systemStateBeforeUpdate;
+  }
+
+  undoLastCommit() {
+    this.systemState = this.previousSystemState;
+  }
+}
