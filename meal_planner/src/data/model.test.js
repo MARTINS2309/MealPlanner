@@ -57,7 +57,6 @@ describe("model", () => {
       });
     });
   });
-
   describe("info blocks", () => {
     describe("ingredientQuantityInfo", () => {
       it("should return the ingredient collection of the supplied recipe", () => {

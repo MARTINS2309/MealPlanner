@@ -1,4 +1,11 @@
-import _ from "lodash";
+const fp = require("lodash/fp");
+const _ = fp.convert({
+  cap: false,
+  curry: false,
+  fixed: false,
+  immutable: true,
+  rearg: false,
+});
 
 export const getIngredientById = (catelog, id) => {
   return _.get(catelog, ["ingredientsById", id]);
