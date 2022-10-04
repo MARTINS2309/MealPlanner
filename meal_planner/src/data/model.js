@@ -115,7 +115,7 @@ export const isAdmin = (userManagementData, email) => {
 };
 
 export const isEditor = (userManagementData, email) => {
-  return _.get(userManagementData, ["usersById", email, "isEditor"]) == true;
+  return _.get(userManagementData, ["usersById", email, "isEditor"]) === true;
 };
 
 export const addUserUM = (userManagementData, user) => {
