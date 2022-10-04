@@ -310,5 +310,22 @@ describe("model", () => {
         expect(user).toEqual(false);
       });
     });
+    describe("addUserUM", () => {
+      it("should return a new userManagementData with a new user added to the user management data", () => {
+        const newUser = {
+          email: "alice",
+          encryptedPassword: "bXlwYXNzd29yZA==",
+          isEditor: false,
+          isBlocked: false,
+          currentMealPlanId: "mealplan1",
+        };
+        expect(appData.userManagementData.usersById).not.toContain("alice");
+        const newUserManagement = m.addUserUM(
+          appData.userManagementData,
+          newUser
+        );
+        expect(newUserManagement.usersById.alice).toBe(newUser);
+      });
+    });
   });
 });
