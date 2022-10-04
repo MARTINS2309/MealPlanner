@@ -163,6 +163,23 @@ describe("model", () => {
     });
   });
   describe("search", () => {
+    describe("searchIngredientsByName", () => {
+      it("should return an array of the ingredient with the given name", () => {
+        const ingredient = m.searchIngredientsByName(appData.catelogData, "Eg");
+        expect(ingredient).toEqual([appData.catelogData.ingredientsById.eggs]);
+      });
+      it("should return an array of another ingredient with the given name", () => {
+        const ingredient = m.searchIngredientsByName(appData.catelogData, "Mi");
+        expect(ingredient).toEqual([appData.catelogData.ingredientsById.milk]);
+      });
+      it("should return an empty array if the ingredient does not exist", () => {
+        const ingredient = m.searchIngredientsByName(
+          appData.catelogData,
+          "doesNotExist"
+        );
+        expect(ingredient).toEqual([]);
+      });
+    });
     describe("searchRecipesByName", () => {
       const recipeMatch1 = m.recipeInfo(
         appData.catelogData,
@@ -287,6 +304,14 @@ describe("model", () => {
     });
   });
   describe("userManagement", () => {
+    const newUser = {
+      email: "alice",
+      encryptedPassword: "bXlwYXNzd29yZA==",
+      isEditor: false,
+      isBlocked: false,
+      currentMealPlanId: "mealplan1",
+    };
+    const existingUser = appData.userManagementData.usersById["john@email.com"];
     describe("isAdmin", () => {
       it("should return true if the user is an admin", () => {
         const user = m.isAdmin(
@@ -310,21 +335,67 @@ describe("model", () => {
         expect(user).toEqual(false);
       });
     });
+
     describe("addUserUM", () => {
       it("should return a new userManagementData with a new user added to the user management data", () => {
-        const newUser = {
-          email: "alice",
-          encryptedPassword: "bXlwYXNzd29yZA==",
-          isEditor: false,
-          isBlocked: false,
-          currentMealPlanId: "mealplan1",
-        };
         expect(appData.userManagementData.usersById).not.toContain("alice");
         const newUserManagement = m.addUserUM(
           appData.userManagementData,
           newUser
         );
         expect(newUserManagement.usersById.alice).toBe(newUser);
+      });
+
+      it("should throw an error if the user already exists", () => {
+        expect(() => {
+          m.addUserUM(appData.userManagementData, existingUser);
+        }).toThrowError("User already exists");
+      });
+    });
+
+    describe("addUserAD", () => {
+      it("should return a new appData with a new user added to the user management data", () => {
+        expect(appData.userManagementData.usersById).not.toContain("alice");
+        const newAppData = m.addUserAD(appData, newUser);
+        expect(newAppData.userManagementData.usersById.alice).toBe(newUser);
+      });
+
+      it("should throw an error if the user already exists", () => {
+        expect(() => {
+          m.addUserAD(appData, existingUser);
+        }).toThrowError("User already exists");
+      });
+    });
+
+    describe("SystemState class", () => {
+      it("should return undefined state by default", () => {
+        new m.SystemState();
+        expect(m.SystemState.get()).toEqual(undefined);
+      });
+      it("should return appData state after initialisation", () => {
+        m.SystemState.initialise(appData);
+        expect(m.SystemState.get()).toEqual(appData);
+      });
+      it("should be able to commit the state", () => {
+        m.SystemState.commit(m.SystemState.get(), "test");
+        expect(m.SystemState.get()).toEqual("test");
+      });
+      it("should be able to undoLastCommit the state", () => {
+        expect(m.SystemState.get()).toEqual("test");
+        m.SystemState.commit(m.SystemState.get(), "test2");
+        expect(m.SystemState.get()).toEqual("test2");
+        m.SystemState.undoLastCommit();
+        expect(m.SystemState.get()).toEqual("test");
+      });
+
+      describe("addUserSys", () => {
+        it("should take a new user and add it to System state", () => {
+          expect(appData.userManagementData.usersById).not.toContain("alice");
+          m.addUserSys(newUser);
+          expect(m.SystemState.get().userManagementData.usersById.alice).toBe(
+            newUser
+          );
+        });
       });
     });
   });

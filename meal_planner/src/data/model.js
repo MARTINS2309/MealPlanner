@@ -1,5 +1,5 @@
+/* eslint-disable no-throw-literal */
 import fp from "lodash/fp.js";
-import { appData } from "./data";
 const _ = fp.convert({
   cap: false,
   curry: false,
@@ -57,6 +57,17 @@ export const mealPlanInfo = (catelog, mealPlan) => {
   };
 
   return mealPlanInfo;
+};
+
+export const searchIngredientsByName = (catelog, name) => {
+  let ingredients = _.get(catelog, "ingredientsById");
+  let matchingIngredients = _.filter(ingredients, (ingredient) => {
+    return _.get(ingredient, "name").includes(name);
+  });
+  if (matchingIngredients.length === 0) {
+    return [];
+  }
+  return matchingIngredients;
 };
 
 export const searchRecipesByName = (catelog, name) => {
@@ -134,23 +145,30 @@ export const addUserSys = (user) => {
   SystemState.commit(previous, next);
 };
 
-class SystemState {
+export class SystemState {
   systemState;
   previousSystemState;
 
-  get() {
+  static initialise(appData) {
+    this.systemState = appData;
+    this.previousSystemState = undefined;
+  }
+
+  static get() {
     return this.systemState;
   }
-  commit(previous, next) {
+  static commit(previous, next) {
     let systemStateBeforeUpdate = this.systemState;
+    /* commented out until implemented
     if (!Consitancy.validate(previous, next)) {
       throw "System data to be commited is not valid";
     }
+    */
     this.systemState = next;
     this.previousSystemState = systemStateBeforeUpdate;
   }
 
-  undoLastCommit() {
+  static undoLastCommit() {
     this.systemState = this.previousSystemState;
   }
 }
