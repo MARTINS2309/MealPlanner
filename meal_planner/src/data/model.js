@@ -7,7 +7,7 @@ const _ = fp.convert({
   immutable: true,
   rearg: false,
 });
-//getters
+//getter functions
 export const getIngredientById = (catelog, id) => {
   return _.get(catelog, ["ingredientsById", id]);
 };
@@ -19,7 +19,7 @@ export const getRecipeById = (catelog, id) => {
 export const getMealPlanById = (catelog, id) => {
   return _.get(catelog, ["mealPlansById", id]);
 };
-//info blocks
+//info blocks functions
 export const ingredientQuantityInfo = (catelog, recipe) => {
   var ingredientIds = _.get(recipe, "ingredientIds");
   var ingredientQuantities = _.get(recipe, "ingredientQuantities");
@@ -58,7 +58,7 @@ export const mealPlanInfo = (catelog, mealPlan) => {
 
   return mealPlanInfo;
 };
-//search
+//search functions
 export const searchIngredientsByName = (catelog, name) => {
   let ingredients = _.get(catelog, "ingredientsById");
   let matchingIngredients = _.filter(ingredients, (ingredient) => {
@@ -110,7 +110,7 @@ export const searchMealPlansByNameJSON = (appData, querry) => {
   return resultsJSON;
 };
 
-//system state
+//system state functions and classes
 export class SystemState {
   systemState;
   previousSystemState;
@@ -125,17 +125,93 @@ export class SystemState {
   }
   static commit(previous, next) {
     let systemStateBeforeUpdate = this.systemState;
+    let nextStateData = SystemConsistency.reconcile(
+      this.systemState,
+      previous,
+      next
+    );
     /* commented out until implemented
-    if (!Consitancy.validate(previous, next)) {
-      throw "System data to be commited is not valid";
-    }
-    */
-    this.systemState = next;
+    if (!SystemValidity.validate(previous, nextStateData)) {
+      throw "The System data to be commited is not valid!";
+    }*/
+    this.systemState = nextStateData;
     this.previousSystemState = systemStateBeforeUpdate;
   }
 
   static undoLastCommit() {
     this.systemState = this.previousSystemState;
+  }
+}
+
+//System Consistency functions and classes
+
+export const informationPaths = (obj, path = []) => {
+  return _.reduce(
+    obj,
+    function (acc, v, k) {
+      if (_.isObject(v)) {
+        return _.concat(acc, informationPaths(v, _.concat(path, k)));
+      }
+      return _.concat(acc, [_.concat(path, k)]); // <1>
+    },
+    []
+  );
+};
+
+export const havePathInCommon = (diff1, diff2) => {
+  return !_.isEmpty(
+    _.intersection(informationPaths(diff1), informationPaths(diff2))
+  );
+};
+
+export const diffObjects = (data1, data2) => {
+  var emptyObject = _.isArray(data1) ? [] : {}; // <1>
+  if (data1 === data2) {
+    return emptyObject;
+  }
+  var keys = _.union(_.keys(data1), _.keys(data2)); // <2>
+  return _.reduce(
+    keys,
+    function (acc, k) {
+      var res = diff(_.get(data1, k), _.get(data2, k));
+      if (
+        (_.isObject(res) && _.isEmpty(res)) || // <3> <4>
+        res === "no-diff"
+      ) {
+        // <5>
+        return acc;
+      }
+      return _.set(acc, [k], res);
+    },
+    emptyObject
+  );
+};
+
+export const diff = (data1, data2) => {
+  if (_.isObject(data1) && _.isObject(data2)) {
+    // <4>
+    return diffObjects(data1, data2);
+  }
+  if (data1 !== data2) {
+    return data2;
+  }
+  return "no-diff"; // <5>
+};
+
+export class SystemConsistency {
+  static threeWayMerge(current, previous, next) {
+    let previousToCurrent = diff(previous, current);
+    let previousToNext = diff(previous, next);
+    if (havePathInCommon(previousToCurrent, previousToNext)) {
+      return _.merge(current, previousToNext);
+    }
+    throw "Conflicting concurrent mutations!";
+  }
+  static reconcile(current, previous, next) {
+    if (current === previous) {
+      return next;
+    }
+    return SystemConsistency.threeWayMerge(current, previous, next);
   }
 }
 

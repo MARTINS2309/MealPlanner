@@ -59,10 +59,9 @@ describe("model", () => {
     ],
     notes: "the instructions are for a fried egg",
   };
-
   const newMealPlan = {
     id: "mealplan3",
-    name: "Meal Plan 3",
+    name: "The applie pie diet",
     recipeIds: ["applepie"],
     recipeQuantities: [{ id: "applepie", quantity: 21 }],
     totalIngredients: [{ id: "apple", quantity: 42 }],
@@ -85,16 +84,9 @@ describe("model", () => {
     isBlocked: false,
     currentMealPlanId: "mealplan1",
   };
-  const existingUser = {
-    email: "john@email.com",
-    encryptedPassword: "c2VjcmV0",
-    isBlocked: false,
-    currentMealPlanId: "mealplan1",
-  };
-  const existingAdmin = {
-    email: "martins2309@gmail.com",
-    encryptedPassword: "bXlwYXNzd29yZA==",
-  };
+  const existingUser = appData.userManagementData.usersById["harry@email.com"];
+  const existingAdmin =
+    appData.userManagementData.adminsById["martins2309@gmail.com"];
 
   describe("getters", () => {
     describe("getIngredientById", () => {
@@ -585,6 +577,15 @@ describe("model", () => {
       expect(m.SystemState.get()).toEqual("test2");
       m.SystemState.undoLastCommit();
       expect(m.SystemState.get()).toEqual("test");
+    });
+
+    describe("System Consistency", () => {
+      describe("informationPaths", () => {
+        it("should return ann information path to  of all the information paths", () => {
+          
+        });
+      describe("SystemConsistency utility class", () => {
+      });
     });
 
     describe("addUserSys", () => {
