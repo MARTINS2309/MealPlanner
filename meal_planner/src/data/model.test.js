@@ -385,11 +385,11 @@ describe("model", () => {
     describe("addUser", () => {
       describe("addUserUM", () => {
         it("should return a new userManagementData with a new user added to the user management data", () => {
-          expect(appData.userManagementData.usersById).not.toContain("alice");
           const newUserManagement = m.addUserUM(
             appData.userManagementData,
             newUser
           );
+          expect(appData.userManagementData.usersById).not.toContain("alice");
           expect(newUserManagement.usersById.alice).toBe(newUser);
         });
 
@@ -579,15 +579,6 @@ describe("model", () => {
       expect(m.SystemState.get()).toEqual("test");
     });
 
-    describe("System Consistency", () => {
-      describe("informationPaths", () => {
-        it("should return ann information path to  of all the information paths", () => {
-          
-        });
-      describe("SystemConsistency utility class", () => {
-      });
-    });
-
     describe("addUserSys", () => {
       m.SystemState.initialise(appData);
       it("should take a new user and add it to System state", () => {
@@ -688,3 +679,4 @@ describe("model", () => {
     });
   });
 });
+// });
