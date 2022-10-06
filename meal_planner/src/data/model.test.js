@@ -579,7 +579,7 @@ describe("model", () => {
       m.SystemState.commit(m.SystemState.get(), "test");
       expect(m.SystemState.get()).toEqual("test");
     });
-    it("should be able to undoLastCommit the state", () => {
+    it("should be able to undo Last Commit", () => {
       expect(m.SystemState.get()).toEqual("test");
       m.SystemState.commit(m.SystemState.get(), "test2");
       expect(m.SystemState.get()).toEqual("test2");
