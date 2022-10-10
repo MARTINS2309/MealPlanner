@@ -579,15 +579,6 @@ describe("model", () => {
       expect(m.SystemState.get()).toEqual("test");
     });
 
-    describe("System Consistency", () => {
-      describe("informationPaths", () => {
-        it("should return ann information path to  of all the information paths", () => {
-          
-        });
-      describe("SystemConsistency utility class", () => {
-      });
-    });
-
     describe("addUserSys", () => {
       m.SystemState.initialise(appData);
       it("should take a new user and add it to System state", () => {

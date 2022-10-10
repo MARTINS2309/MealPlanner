@@ -1,4 +1,4 @@
-export var library = {
+var library = {
   catalog: {
     booksByIsbn: {
       "978-1779501127": {
@@ -20,3 +20,4 @@ export var library = {
     },
   },
 };
+module.exports = library;
