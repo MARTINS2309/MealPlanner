@@ -679,4 +679,34 @@ describe("model", () => {
       });
     });
   });
+  describe("System Consitency", () => {
+    describe("SystemConsitency class", () => {
+      describe("threeWayMerge", () => {});
+      describe("reconcile", () => {});
+    });
+    describe("informationPaths", () => {});
+    describe("havePathInCommon", () => {});
+    describe("diffObjects", () => {
+      it("should return the diff between two objects", () => {
+        expect(m.diffObjects({ a: 1 }, { a: 2 })).toEqual({ a: 2 });
+      });
+      it("should return the diff between two objects", () => {
+        expect(m.diffObjects({ a: 1 }, { a: 1 })).toEqual({});
+      });
+      it("should return the diff between two objects", () => {
+        expect(m.diffObjects({ a: 1 }, { a: 1, b: 2 })).toEqual({ b: 2 });
+      });
+    });
+    describe("diff", () => {
+      it("should return the diff between two objects", () => {
+        expect(m.diff({ a: 1 }, { a: 2 })).toEqual({ a: 2 });
+      });
+      it("should return string  no-diff when two objects are the same", () => {
+        expect(m.diff()).toEqual("no-diff");
+      });
+      it("should return the diff between two objects", () => {
+        expect(m.diff({ a: 1 }, { a: 1, b: 2 })).toEqual({ b: 2 });
+      });
+    });
+  });
 });

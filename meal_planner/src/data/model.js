@@ -197,8 +197,9 @@ export const diff = (data1, data2) => {
   }
   return "no-diff"; // <5>
 };
-
+//This doesn't do anything in plain JavaScript, but it's here to show that it would be used in a concurrent system if you are taking a optimistic approach
 export class SystemConsistency {
+  //This is a cool algirothim that unfortunately doesn't work in JavaScript because of the way it handles parrallel processes i.e. it doesn't since its single threaded and controlled by the event loop
   static threeWayMerge(current, previous, next) {
     let previousToCurrent = diff(previous, current);
     let previousToNext = diff(previous, next);
@@ -207,6 +208,7 @@ export class SystemConsistency {
     }
     throw "Conflicting concurrent mutations!";
   }
+
   static reconcile(current, previous, next) {
     if (current === previous) {
       return next;
