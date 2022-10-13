@@ -85,8 +85,8 @@ describe("model", () => {
     isBlocked: false,
     currentMealPlanId: "mealplan1",
   };
-  const existingUser = appData.userManagementData.usersById["harry@email.com"];
-  const existingAdmin =
+  const userMatch1 = appData.userManagementData.usersById["harry@email.com"];
+  const adminMatch1 =
     appData.userManagementData.adminsById["martins2309@gmail.com"];
 
   describe("getters", () => {
@@ -396,7 +396,7 @@ describe("model", () => {
 
         it("should throw an error if the user already exists", () => {
           expect(() => {
-            m.addUserUM(appData.userManagementData, existingUser);
+            m.addUserUM(appData.userManagementData, userMatch1);
           }).toThrowError("User already exists");
         });
       });
@@ -410,7 +410,7 @@ describe("model", () => {
 
         it("should throw an error if the user already exists", () => {
           expect(() => {
-            m.addUserAD(appData, existingUser);
+            m.addUserAD(appData, userMatch1);
           }).toThrowError("User already exists");
         });
       });
@@ -429,7 +429,7 @@ describe("model", () => {
 
         it("should throw an error if the user already exists", () => {
           expect(() => {
-            m.addAdminUM(appData.userManagementData, existingAdmin);
+            m.addAdminUM(appData.userManagementData, adminMatch1);
           }).toThrowError("Admin already exists");
         });
       });
@@ -443,7 +443,7 @@ describe("model", () => {
 
         it("should throw an error if the user already exists", () => {
           expect(() => {
-            m.addAdminAD(appData, existingAdmin);
+            m.addAdminAD(appData, adminMatch1);
           }).toThrowError("Admin already exists");
         });
       });
@@ -684,28 +684,62 @@ describe("model", () => {
       describe("threeWayMerge", () => {});
       describe("reconcile", () => {});
     });
-    describe("informationPaths", () => {});
-    describe("havePathInCommon", () => {});
     describe("diffObjects", () => {
       it("should return the diff between two objects", () => {
         expect(m.diffObjects({ a: 1 }, { a: 2 })).toEqual({ a: 2 });
       });
       it("should return the diff between two objects", () => {
+        expect(m.diffObjects({ a: 1 }, { a: 1, b: 2 })).toEqual({ b: 2 });
+      });
+      it("should return an empty object if they are the same", () => {
         expect(m.diffObjects({ a: 1 }, { a: 1 })).toEqual({});
       });
-      it("should return the diff between two objects", () => {
-        expect(m.diffObjects({ a: 1 }, { a: 1, b: 2 })).toEqual({ b: 2 });
+      it("should return an empty object if the input is not defined", () => {
+        expect(m.diffObjects()).toEqual({});
       });
     });
     describe("diff", () => {
       it("should return the diff between two objects", () => {
         expect(m.diff({ a: 1 }, { a: 2 })).toEqual({ a: 2 });
       });
-      it("should return string  no-diff when two objects are the same", () => {
-        expect(m.diff()).toEqual("no-diff");
-      });
       it("should return the diff between two objects", () => {
         expect(m.diff({ a: 1 }, { a: 1, b: 2 })).toEqual({ b: 2 });
+      });
+      it("should return an empty object when two objects are the same", () => {
+        expect(m.diff({ a: 1 }, { a: 1 })).toEqual({});
+      });
+      it("if provided with nothing it should return a string saying no-diff", () => {
+        expect(m.diff()).toEqual("no-diff");
+      });
+    });
+    describe("informationPaths", () => {
+      it("should return an array of paths - nested object (recipe)", () => {
+        const recipeInfoPath = m.informationPaths(recipeMatch1);
+        expect(recipeInfoPath).toEqual([
+          ["id"],
+          ["name"],
+          ["ingredientIds", 0],
+          ["ingredientQuantities", 0, "id"],
+          ["ingredientQuantities", 0, "quantity"],
+          ["calories"],
+          ["servingSize"],
+          ["cookTime"],
+          ["prepTime"],
+          ["directions", 0],
+          ["directions", 1],
+          ["directions", 2],
+          ["notes"],
+        ]);
+      });
+      it("should return an array of paths - nested object (user)", () => {
+        const userInfoPath = m.informationPaths(userMatch1);
+        expect(userInfoPath).toEqual([
+          ["email"],
+          ["encryptedPassword"],
+          ["isBlocked"],
+          ["currentMealPlanId"],
+          ["isEditor"],
+        ]);
       });
     });
   });

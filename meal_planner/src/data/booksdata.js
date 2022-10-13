@@ -20,4 +20,5 @@ var library = {
     },
   },
 };
+
 module.exports = library;
