@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import fp from "lodash/fp.js";
 const _ = fp.convert({
   cap: false,

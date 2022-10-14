@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-throw-literal */
 import fp from "lodash/fp.js";
 const _ = fp.convert({
@@ -8,19 +9,19 @@ const _ = fp.convert({
   rearg: false,
 });
 //getter functions
-export const getIngredientById = (catelog, id) => {
+const getIngredientById = (catelog, id) => {
   return _.get(catelog, ["ingredientsById", id]);
 };
 
-export const getRecipeById = (catelog, id) => {
+const getRecipeById = (catelog, id) => {
   return _.get(catelog, ["recipesById", id]);
 };
 
-export const getMealPlanById = (catelog, id) => {
+const getMealPlanById = (catelog, id) => {
   return _.get(catelog, ["mealPlansById", id]);
 };
 //info blocks functions
-export const ingredientQuantityInfo = (catelog, recipe) => {
+const ingredientQuantityInfo = (catelog, recipe) => {
   var ingredientIds = _.get(recipe, "ingredientIds");
   var ingredientQuantities = _.get(recipe, "ingredientQuantities");
   var ingredientInfo = _.map(ingredientIds, function (ingredientId, index) {
@@ -32,7 +33,7 @@ export const ingredientQuantityInfo = (catelog, recipe) => {
   return ingredientInfo;
 };
 
-export const recipeInfo = (catelog, recipe) => {
+const recipeInfo = (catelog, recipe) => {
   if (recipe === undefined || _.get(recipe, "name") === undefined) {
     return {};
   }
@@ -45,7 +46,7 @@ export const recipeInfo = (catelog, recipe) => {
   return recipeInfo;
 };
 
-export const mealPlanInfo = (catelog, mealPlan) => {
+const mealPlanInfo = (catelog, mealPlan) => {
   if (mealPlan === undefined || _.get(mealPlan, "name") === undefined) {
     return {};
   }
@@ -59,7 +60,7 @@ export const mealPlanInfo = (catelog, mealPlan) => {
   return mealPlanInfo;
 };
 //search functions
-export const searchIngredientsByName = (catelog, name) => {
+const searchIngredientsByName = (catelog, name) => {
   let ingredients = _.get(catelog, "ingredientsById");
   let matchingIngredients = _.filter(ingredients, (ingredient) => {
     return _.get(ingredient, "name").includes(name);
@@ -70,7 +71,7 @@ export const searchIngredientsByName = (catelog, name) => {
   return matchingIngredients;
 };
 
-export const searchRecipesByName = (catelog, name) => {
+const searchRecipesByName = (catelog, name) => {
   let recipes = _.values(_.get(catelog, "recipesById"));
   let matchingRecipes = _.filter(recipes, (recipe) => {
     return _.get(recipe, "name").includes(name);
@@ -84,13 +85,13 @@ export const searchRecipesByName = (catelog, name) => {
   return recipeInfos;
 };
 
-export const searchRecipesByNameJSON = (appData, querry) => {
+const searchRecipesByNameJSON = (appData, querry) => {
   let results = searchRecipesByName(_.get(appData, "catelogData"), querry);
   let resultsJSON = JSON.stringify(results);
   return resultsJSON;
 };
 
-export const searchMealPlansByName = (catelog, name) => {
+const searchMealPlansByName = (catelog, name) => {
   let mealPlans = _.values(_.get(catelog, "mealPlansById"));
   let matchingMealPlans = _.filter(mealPlans, (mealPlan) => {
     return _.get(mealPlan, "name").includes(name);
@@ -104,14 +105,14 @@ export const searchMealPlansByName = (catelog, name) => {
   return mealPlanInfos;
 };
 
-export const searchMealPlansByNameJSON = (appData, querry) => {
+const searchMealPlansByNameJSON = (appData, querry) => {
   let results = searchMealPlansByName(_.get(appData, "catelogData"), querry);
   let resultsJSON = JSON.stringify(results);
   return resultsJSON;
 };
 
 //system state functions and classes
-export class SystemState {
+class SystemState {
   systemState;
   previousSystemState;
   // initialise is here temporarily until there is a backend to supply initial state
@@ -145,7 +146,7 @@ export class SystemState {
 
 //System Consistency functions and classes
 
-export const informationPaths = (obj, path = []) => {
+const informationPaths = (obj, path = []) => {
   return _.reduce(
     obj,
     function (acc, v, k) {
@@ -158,13 +159,14 @@ export const informationPaths = (obj, path = []) => {
   );
 };
 
-export const havePathInCommon = (diff1, diff2) => {
+//the results of informationPaths has to be spread into _.intersection otherwise its returning empty if the inputs were identical with different references
+const havePathInCommon = (diff1, diff2) => {
   return !_.isEmpty(
-    _.intersection(informationPaths(diff1), informationPaths(diff2))
+    _.intersection(...informationPaths(diff1), ...informationPaths(diff2))
   );
 };
 
-export const diffObjects = (data1, data2) => {
+const diffObjects = (data1, data2) => {
   var emptyObject = _.isArray(data1) ? [] : {}; // <1>
   if (data1 === data2) {
     return emptyObject;
@@ -187,7 +189,7 @@ export const diffObjects = (data1, data2) => {
   );
 };
 
-export const diff = (data1, data2) => {
+const diff = (data1, data2) => {
   if (_.isObject(data1) && _.isObject(data2)) {
     // <4>
     return diffObjects(data1, data2);
@@ -198,12 +200,12 @@ export const diff = (data1, data2) => {
   return "no-diff"; // <5>
 };
 //This doesn't do anything in plain JavaScript, but it's here to show that it would be used in a concurrent system if you are taking a optimistic approach
-export class SystemConsistency {
+class SystemConsistency {
   //This is a cool algirothim that unfortunately doesn't work in JavaScript because of the way it handles parrallel processes i.e. it doesn't since its single threaded and controlled by the event loop
   static threeWayMerge(current, previous, next) {
     let previousToCurrent = diff(previous, current);
     let previousToNext = diff(previous, next);
-    if (havePathInCommon(previousToCurrent, previousToNext)) {
+    if (!havePathInCommon(previousToCurrent, previousToNext)) {
       return _.merge(current, previousToNext);
     }
     throw "Conflicting concurrent mutations!";
@@ -218,15 +220,15 @@ export class SystemConsistency {
 }
 
 //user management
-export const isAdmin = (userManagementData, email) => {
+const isAdmin = (userManagementData, email) => {
   return _.has(_.get(userManagementData, "adminsById"), email);
 };
 
-export const isEditor = (userManagementData, email) => {
+const isEditor = (userManagementData, email) => {
   return _.get(userManagementData, ["usersById", email, "isEditor"]) === true;
 };
 
-export const addUserUM = (userManagementData, user) => {
+const addUserUM = (userManagementData, user) => {
   let email = _.get(user, "email");
   let infoPath = ["usersById", email];
   if (_.has(userManagementData, infoPath)) {
@@ -236,7 +238,7 @@ export const addUserUM = (userManagementData, user) => {
   return nextUserManagementData;
 };
 
-export const addUserAD = (appData, user) => {
+const addUserAD = (appData, user) => {
   let currentUserManagementData = _.get(appData, "userManagementData");
   let nextUserManagementData = addUserUM(currentUserManagementData, user);
   let nextAppData = _.set(
@@ -247,13 +249,13 @@ export const addUserAD = (appData, user) => {
   return nextAppData;
 };
 
-export const addUserSys = (user) => {
+const addUserSys = (user) => {
   let previous = SystemState.get();
   let next = addUserAD(previous, user);
   SystemState.commit(previous, next);
 };
 
-export const addAdminUM = (userManagementData, user) => {
+const addAdminUM = (userManagementData, user) => {
   let email = _.get(user, "email");
   let infoPath = ["adminsById", email];
   if (_.has(userManagementData, infoPath)) {
@@ -263,7 +265,7 @@ export const addAdminUM = (userManagementData, user) => {
   return nextUserManagementData;
 };
 
-export const addAdminAD = (appData, user) => {
+const addAdminAD = (appData, user) => {
   let currentUserManagementData = _.get(appData, "userManagementData");
   let nextUserManagementData = addAdminUM(currentUserManagementData, user);
   let nextAppData = _.set(
@@ -274,14 +276,14 @@ export const addAdminAD = (appData, user) => {
   return nextAppData;
 };
 
-export const addAdminSys = (user) => {
+const addAdminSys = (user) => {
   let previous = SystemState.get();
   let next = addAdminAD(previous, user);
   SystemState.commit(previous, next);
 };
 
 //catelogData management
-export const addIngredientCD = (catelogData, ingredient) => {
+const addIngredientCD = (catelogData, ingredient) => {
   let id = _.get(ingredient, "id");
   let infoPath = ["ingredientsById", id];
   if (_.has(catelogData, infoPath)) {
@@ -291,20 +293,20 @@ export const addIngredientCD = (catelogData, ingredient) => {
   return nextCatelogData;
 };
 
-export const addIngredientAD = (appData, ingredient) => {
+const addIngredientAD = (appData, ingredient) => {
   let currentCatelogData = _.get(appData, "catelogData");
   let nextCatelogData = addIngredientCD(currentCatelogData, ingredient);
   let nextAppData = _.set(appData, "catelogData", nextCatelogData);
   return nextAppData;
 };
 
-export const addIngredientSys = (ingredient) => {
+const addIngredientSys = (ingredient) => {
   let previous = SystemState.get();
   let next = addIngredientAD(previous, ingredient);
   SystemState.commit(previous, next);
 };
 
-export const addRecipeCD = (catelogData, recipe) => {
+const addRecipeCD = (catelogData, recipe) => {
   let id = _.get(recipe, "id");
   let infoPath = ["recipesById", id];
   if (_.has(catelogData, infoPath)) {
@@ -314,20 +316,20 @@ export const addRecipeCD = (catelogData, recipe) => {
   return nextCatelogData;
 };
 
-export const addRecipeAD = (appData, recipe) => {
+const addRecipeAD = (appData, recipe) => {
   let currentCatelogData = _.get(appData, "catelogData");
   let nextCatelogData = addRecipeCD(currentCatelogData, recipe);
   let nextAppData = _.set(appData, "catelogData", nextCatelogData);
   return nextAppData;
 };
 
-export const addRecipeSys = (recipe) => {
+const addRecipeSys = (recipe) => {
   let previous = SystemState.get();
   let next = addRecipeAD(previous, recipe);
   SystemState.commit(previous, next);
 };
 
-export const addMealPlanCD = (catelogData, mealPlan) => {
+const addMealPlanCD = (catelogData, mealPlan) => {
   let id = _.get(mealPlan, "id");
   let infoPath = ["mealPlansById", id];
   if (_.has(catelogData, infoPath)) {
@@ -337,15 +339,53 @@ export const addMealPlanCD = (catelogData, mealPlan) => {
   return nextCatelogData;
 };
 
-export const addMealPlanAD = (appData, mealPlan) => {
+const addMealPlanAD = (appData, mealPlan) => {
   let currentCatelogData = _.get(appData, "catelogData");
   let nextCatelogData = addMealPlanCD(currentCatelogData, mealPlan);
   let nextAppData = _.set(appData, "catelogData", nextCatelogData);
   return nextAppData;
 };
 
-export const addMealPlanSys = (mealPlan) => {
+const addMealPlanSys = (mealPlan) => {
   let previous = SystemState.get();
   let next = addMealPlanAD(previous, mealPlan);
   SystemState.commit(previous, next);
+};
+
+//export for all functions
+module.exports = {
+  SystemState,
+  SystemConsistency,
+  diffObjects,
+  diff,
+  havePathInCommon,
+  informationPaths,
+  addMealPlanSys,
+  addMealPlanAD,
+  addMealPlanCD,
+  addRecipeSys,
+  addRecipeAD,
+  addRecipeCD,
+  addIngredientSys,
+  addIngredientAD,
+  addIngredientCD,
+  addAdminSys,
+  addAdminAD,
+  addAdminUM,
+  addUserSys,
+  addUserAD,
+  addUserUM,
+  isEditor,
+  isAdmin,
+  searchMealPlansByNameJSON,
+  searchMealPlansByName,
+  searchRecipesByNameJSON,
+  searchRecipesByName,
+  searchIngredientsByName,
+  mealPlanInfo,
+  recipeInfo,
+  ingredientQuantityInfo,
+  getMealPlanById,
+  getRecipeById,
+  getIngredientById,
 };

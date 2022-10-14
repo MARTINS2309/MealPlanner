@@ -1,6 +1,6 @@
-import * as m from "./model";
-import { appData } from "./data.js";
-import { describe, it, expect } from "@jest/globals";
+/* eslint-disable no-undef */
+const m = require("./model.mjs");
+const appData = require("./data").default;
 
 describe("model", () => {
   //catelog variables
@@ -34,6 +34,19 @@ describe("model", () => {
   const newIngredient = {
     id: "apple",
     name: "Apple",
+    calories: 100,
+    protein: 10,
+    fat: 3,
+    carbs: 30,
+    fiber: 1,
+    sugar: 1,
+    sodium: 1,
+    salt: 0.5,
+  };
+
+  const newIngredientSameId = {
+    id: "apple",
+    name: "Bad Apple",
     calories: 100,
     protein: 10,
     fat: 3,
@@ -680,66 +693,466 @@ describe("model", () => {
     });
   });
   describe("System Consitency", () => {
+    //generating a new state for diff, diffObjects, informationPaths and havePathInCommon functions
+    m.SystemState.initialise(appData);
+
+    const previous = m.SystemState.get();
+    const currentSame = m.SystemState.get();
+    const currentDifferent = m.addIngredientAD(previous, newIngredient);
+    const nextConflict = m.addIngredientAD(previous, newIngredientSameId);
+    const nextNoConflict = m.addUserAD(previous, newUser);
+
+    const diffPreviousToCurrentDifferent = {
+      catelogData: {
+        ingredientsById: {
+          apple: {
+            calories: 100,
+            carbs: 30,
+            fat: 3,
+            fiber: 1,
+            id: "apple",
+            name: "Apple",
+            protein: 10,
+            salt: 0.5,
+            sodium: 1,
+            sugar: 1,
+          },
+        },
+      },
+    };
+
+    const diffPreviousToNextConflict = {
+      catelogData: {
+        ingredientsById: {
+          apple: {
+            calories: 100,
+            carbs: 30,
+            fat: 3,
+            fiber: 1,
+            id: "apple",
+            name: "Bad Apple",
+            protein: 10,
+            salt: 0.5,
+            sodium: 1,
+            sugar: 1,
+          },
+        },
+      },
+    };
+
+    const diffPreviousToNextNoConflict = {
+      userManagementData: {
+        usersById: {
+          alice: {
+            currentMealPlanId: "mealplan1",
+            email: "alice",
+            encryptedPassword: "bXlwYXNzd29yZA==",
+            isBlocked: false,
+            isEditor: false,
+          },
+        },
+      },
+    };
+
+    const infoPathPreviousToCurrent = [
+      ["catelogData", "ingredientsById", "apple", "calories"],
+      ["catelogData", "ingredientsById", "apple", "carbs"],
+      ["catelogData", "ingredientsById", "apple", "fat"],
+      ["catelogData", "ingredientsById", "apple", "fiber"],
+      ["catelogData", "ingredientsById", "apple", "id"],
+      ["catelogData", "ingredientsById", "apple", "name"],
+      ["catelogData", "ingredientsById", "apple", "protein"],
+      ["catelogData", "ingredientsById", "apple", "salt"],
+      ["catelogData", "ingredientsById", "apple", "sodium"],
+      ["catelogData", "ingredientsById", "apple", "sugar"],
+    ];
+
+    const infoPathPreviousToNextConflict = [
+      ["catelogData", "ingredientsById", "apple", "calories"],
+      ["catelogData", "ingredientsById", "apple", "carbs"],
+      ["catelogData", "ingredientsById", "apple", "fat"],
+      ["catelogData", "ingredientsById", "apple", "fiber"],
+      ["catelogData", "ingredientsById", "apple", "id"],
+      ["catelogData", "ingredientsById", "apple", "name"],
+      ["catelogData", "ingredientsById", "apple", "protein"],
+      ["catelogData", "ingredientsById", "apple", "salt"],
+      ["catelogData", "ingredientsById", "apple", "sodium"],
+      ["catelogData", "ingredientsById", "apple", "sugar"],
+    ];
+    const infoPathPrevoiusToNextNoConflict = [
+      ["userManagementData", "usersById", "alice", "currentMealPlanId"],
+      ["userManagementData", "usersById", "alice", "email"],
+      ["userManagementData", "usersById", "alice", "encryptedPassword"],
+      ["userManagementData", "usersById", "alice", "isBlocked"],
+      ["userManagementData", "usersById", "alice", "isEditor"],
+    ];
+
+    const mergedCurrentWithPreviousToNext = {
+      catelogData: {
+        ingredientsById: {
+          apple: {
+            calories: 100,
+            carbs: 30,
+            fat: 3,
+            fiber: 1,
+            id: "apple",
+            name: "Apple",
+            protein: 10,
+            salt: 0.5,
+            sodium: 1,
+            sugar: 1,
+          },
+          eggs: {
+            calories: 200,
+            carbs: 20,
+            fat: 5,
+            fiber: 2,
+            id: "eggs",
+            name: "Eggs",
+            protein: 20,
+            salt: 1,
+            sodium: 2,
+            sugar: 2,
+          },
+          milk: {
+            calories: 100,
+            carbs: 30,
+            fat: 3,
+            fiber: 1,
+            id: "milk",
+            name: "Milk",
+            protein: 10,
+            salt: 0.5,
+            sodium: 1,
+            sugar: 1,
+          },
+          sugar: {
+            calories: 100,
+            carbs: 100,
+            fat: 0,
+            fiber: 0,
+            id: "sugar",
+            name: "Sugar",
+            protein: 0,
+            salt: 0,
+            sodium: 0,
+            sugar: 100,
+          },
+        },
+        mealPlansById: {
+          mealplan1: {
+            description: "My First Meal Plan for a week of nothing but eggs",
+            id: "mealplan1",
+            name: "Original Breakfast all week",
+            recipeIds: ["fryedeggs", "sweetomlette"],
+            recipeQuantities: [
+              { id: "fryedeggs", qty: 7 },
+              { id: "sweetomlette", qty: 14 },
+            ],
+            schedule: [
+              {
+                breakfast: "fryedeggs",
+                dinner: "sweetomlette",
+                lunch: "sweetomlette",
+              },
+              {
+                breakfast: "fryedeggs",
+                dinner: "sweetomlette",
+                lunch: "sweetomlette",
+              },
+              {
+                breakfast: "fryedeggs",
+                dinner: "sweetomlette",
+                lunch: "sweetomlette",
+              },
+              {
+                breakfast: "fryedeggs",
+                dinner: "sweetomlette",
+                lunch: "sweetomlette",
+              },
+              {
+                breakfast: "fryedeggs",
+                dinner: "sweetomlette",
+                lunch: "sweetomlette",
+              },
+              {
+                breakfast: "fryedeggs",
+                dinner: "sweetomlette",
+                lunch: "sweetomlette",
+              },
+              {
+                breakfast: "fryedeggs",
+                dinner: "sweetomlette",
+                lunch: "sweetomlette",
+              },
+            ],
+            totalIngredients: [
+              { id: "eggs", qty: 21 },
+              { id: "milk", qty: 14 },
+              { id: "sugar", qty: 14 },
+            ],
+          },
+          mealplan2: {
+            description: "My Second Meal Plan for a week of nothing but eggs",
+            id: "mealplan2",
+            name: "Alternative Breakfast all week",
+            recipeIds: ["fryedeggs", "sweetomlette"],
+            recipeQuantities: [
+              { id: "fryedeggs", qty: 14 },
+              { id: "sweetomlette", qty: 7 },
+            ],
+            schedule: [
+              {
+                breakfast: "fryedeggs",
+                dinner: "fryedeggs",
+                lunch: "sweetomlette",
+              },
+              {
+                breakfast: "fryedeggs",
+                dinner: "fryedeggs",
+                lunch: "sweetomlette",
+              },
+              {
+                breakfast: "fryedeggs",
+                dinner: "fryedeggs",
+                lunch: "sweetomlette",
+              },
+              {
+                breakfast: "fryedeggs",
+                dinner: "fryedeggs",
+                lunch: "sweetomlette",
+              },
+              {
+                breakfast: "fryedeggs",
+                dinner: "fryedeggs",
+                lunch: "sweetomlette",
+              },
+              {
+                breakfast: "fryedeggs",
+                dinner: "fryedeggs",
+                lunch: "sweetomlette",
+              },
+              {
+                breakfast: "fryedeggs",
+                dinner: "fryedeggs",
+                lunch: "sweetomlette",
+              },
+            ],
+            totalIngredients: [
+              { id: "eggs", qty: 35 },
+              { id: "milk", qty: 7 },
+              { id: "sugar", qty: 7 },
+            ],
+          },
+        },
+        recipesById: {
+          fryedeggs: {
+            calories: 200,
+            cookTime: 10,
+            directions: [
+              "Heat pan to high temprature",
+              "Crack the egg on the pan",
+              "Fry the egg until the yellow has solidified",
+            ],
+            id: "fryedeggs",
+            ingredientIds: ["eggs"],
+            ingredientQuantities: [{ id: "eggs", quantity: 2 }],
+            name: "Fried Eggs",
+            notes: "Fried eggs are a great way to start your day",
+            prepTime: 5,
+            servingSize: 1,
+          },
+          sweetomlette: {
+            calories: 400,
+            cookTime: 15,
+            directions: [
+              "Heat pan to high temprature",
+              "Mix the Eggs, Milk and Sugar in a bowl",
+              "Cook the mixture for 10 minutes on the pan",
+            ],
+            id: "sweetomlette",
+            ingredientIds: ["eggs", "milk", "sugar"],
+            ingredientQuantities: [
+              { id: "eggs", quantity: 1 },
+              { id: "milk", quantity: 1 },
+              { id: "sugar", quantity: 1 },
+            ],
+            name: "Sweet Omlette",
+            notes:
+              "Sweet omlette will surprise everyone and is great way to start your day",
+            prepTime: 10,
+            servingSize: 2,
+          },
+        },
+      },
+      userManagementData: {
+        adminsById: {
+          "martins2309@gmail.com": {
+            email: "martins2309@gmail.com",
+            encryptedPassword: "bXlwYXNzd29yZA==",
+          },
+        },
+        usersById: {
+          alice: {
+            currentMealPlanId: "mealplan1",
+            email: "alice",
+            encryptedPassword: "bXlwYXNzd29yZA==",
+            isBlocked: false,
+            isEditor: false,
+          },
+          "harry@email.com": {
+            currentMealPlanId: "mealplan2",
+            email: "harry@email.com",
+            encryptedPassword: "c2VjcmV0",
+            isBlocked: false,
+            isEditor: true,
+          },
+          "john@email.com": {
+            currentMealPlanId: "mealplan1",
+            email: "john@email.com",
+            encryptedPassword: "c2VjcmV0",
+            isBlocked: false,
+          },
+        },
+      },
+    };
+
     describe("SystemConsitency class", () => {
-      describe("threeWayMerge", () => {});
-      describe("reconcile", () => {});
+      new m.SystemConsistency();
+
+      it("should have all the correct functions exported", () => {
+        expect(m.SystemConsistency.threeWayMerge).toBeDefined();
+        expect(m.SystemConsistency.reconcile).toBeDefined();
+      });
+
+      describe("threeWayMerge", () => {
+        it("should return a new merged state if no conflict found", () => {
+          expect(
+            m.SystemConsistency.threeWayMerge(
+              currentDifferent,
+              previous,
+              nextNoConflict
+            )
+          ).toStrictEqual(mergedCurrentWithPreviousToNext);
+        });
+
+        it("should return null and throw error if there are conflicts between current and next state", () => {
+          expect(() => {
+            m.SystemConsistency.threeWayMerge(
+              currentDifferent,
+              previous,
+              nextConflict
+            );
+          }).toThrowError("Conflicting concurrent mutations!");
+        });
+      });
+      describe("reconcile", () => {
+        it("should return next if current and previous are the same", () => {
+          expect(
+            m.SystemConsistency.reconcile(currentSame, previous, nextNoConflict)
+          ).toStrictEqual(nextNoConflict);
+        });
+        it("should return a new valid state if current and previous are the different and there are no conflicts", () => {
+          expect(
+            m.SystemConsistency.reconcile(
+              currentDifferent,
+              previous,
+              nextNoConflict
+            )
+          ).toStrictEqual(mergedCurrentWithPreviousToNext);
+        });
+        it("should return null and throw error if there are conflicts between current and next state", () => {
+          expect(() => {
+            m.SystemConsistency.reconcile(
+              currentDifferent,
+              previous,
+              nextConflict
+            );
+          }).toThrowError("Conflicting concurrent mutations!");
+        });
+      });
     });
     describe("diffObjects", () => {
-      it("should return the diff between two objects", () => {
-        expect(m.diffObjects({ a: 1 }, { a: 2 })).toEqual({ a: 2 });
+      //diffObjects is only called by diff, which is only called in threeWayMerge, which is only called when system state previous and current are different making the last test redundant
+      it("should get difference between two object and display in the index of each object", () => {
+        const diffObjectsTest = m.diffObjects(previous, currentDifferent);
+        expect(diffObjectsTest).toEqual(diffPreviousToCurrentDifferent);
       });
-      it("should return the diff between two objects", () => {
-        expect(m.diffObjects({ a: 1 }, { a: 1, b: 2 })).toEqual({ b: 2 });
+      it("should get the difference of two other states", () => {
+        const diffObjectsTest = m.diffObjects(previous, nextConflict);
+        expect(diffObjectsTest).toEqual(diffPreviousToNextConflict);
       });
-      it("should return an empty object if they are the same", () => {
-        expect(m.diffObjects({ a: 1 }, { a: 1 })).toEqual({});
+      it("should get the difference of two other states", () => {
+        const diffObjectsTest = m.diffObjects(previous, nextNoConflict);
+        expect(diffObjectsTest).toEqual(diffPreviousToNextNoConflict);
       });
-      it("should return an empty object if the input is not defined", () => {
-        expect(m.diffObjects()).toEqual({});
+      it("should return an empty object if inputs are the same", () => {
+        const diffObjectsTest = m.diffObjects(previous, currentSame);
+        expect(diffObjectsTest).toEqual({});
       });
     });
     describe("diff", () => {
+      //diff is only called in threeWayMerge, which is only called when system state previous and current are different making the last two tests redundant
       it("should return the diff between two objects", () => {
-        expect(m.diff({ a: 1 }, { a: 2 })).toEqual({ a: 2 });
+        const diffTest = m.diff(previous, currentDifferent);
+        expect(diffTest).toEqual(diffPreviousToCurrentDifferent);
       });
-      it("should return the diff between two objects", () => {
-        expect(m.diff({ a: 1 }, { a: 1, b: 2 })).toEqual({ b: 2 });
+      it("should return another diff between two objects", () => {
+        const diffTest = m.diff(previous, nextConflict);
+        expect(diffTest).toEqual(diffPreviousToNextConflict);
       });
+      it("should return another diff between two objects", () => {
+        const diffTest = m.diff(previous, nextNoConflict);
+        expect(diffTest).toEqual(diffPreviousToNextNoConflict);
+      });
+
+      //the following cases wouldnt happen normally
       it("should return an empty object when two objects are the same", () => {
-        expect(m.diff({ a: 1 }, { a: 1 })).toEqual({});
+        const diffTest = m.diff(previous, currentSame);
+        expect(diffTest).toEqual({});
       });
       it("if provided with nothing it should return a string saying no-diff", () => {
         expect(m.diff()).toEqual("no-diff");
       });
     });
     describe("informationPaths", () => {
-      it("should return an array of paths - nested object (recipe)", () => {
-        const recipeInfoPath = m.informationPaths(recipeMatch1);
-        expect(recipeInfoPath).toEqual([
-          ["id"],
-          ["name"],
-          ["ingredientIds", 0],
-          ["ingredientQuantities", 0, "id"],
-          ["ingredientQuantities", 0, "quantity"],
-          ["calories"],
-          ["servingSize"],
-          ["cookTime"],
-          ["prepTime"],
-          ["directions", 0],
-          ["directions", 1],
-          ["directions", 2],
-          ["notes"],
-        ]);
+      it("should return an array of paths", () => {
+        const informationPathTest1 = m.informationPaths(
+          diffPreviousToCurrentDifferent
+        );
+        expect(informationPathTest1).toEqual(infoPathPreviousToCurrent);
       });
-      it("should return an array of paths - nested object (user)", () => {
-        const userInfoPath = m.informationPaths(userMatch1);
-        expect(userInfoPath).toEqual([
-          ["email"],
-          ["encryptedPassword"],
-          ["isBlocked"],
-          ["currentMealPlanId"],
-          ["isEditor"],
-        ]);
+
+      it("should return another array of paths", () => {
+        const informationPathTest2 = m.informationPaths(
+          diffPreviousToNextConflict
+        );
+        expect(informationPathTest2).toEqual(infoPathPreviousToNextConflict);
+      });
+
+      it("should return another array of paths", () => {
+        const informationPathTest3 = m.informationPaths(
+          diffPreviousToNextNoConflict
+        );
+        expect(informationPathTest3).toEqual(infoPathPrevoiusToNextNoConflict);
+      });
+    });
+    describe("havePathInCommon", () => {
+      it("should return true if paths are intersecting", () => {
+        expect(
+          m.havePathInCommon(
+            diffPreviousToCurrentDifferent,
+            diffPreviousToNextConflict
+          )
+        ).toBeTruthy();
+      });
+      it("should return false if paths are not intersecting", () => {
+        expect(
+          m.havePathInCommon(
+            diffPreviousToCurrentDifferent,
+            diffPreviousToNextNoConflict
+          )
+        ).toBeFalsy();
       });
     });
   });

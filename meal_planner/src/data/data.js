@@ -1,4 +1,4 @@
-export let appData = {
+let appData = {
   catelogData: {
     ingredientsById: {
       milk: {
@@ -208,3 +208,5 @@ export let appData = {
     },
   },
 };
+
+export default appData;
