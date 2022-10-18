@@ -8,6 +8,7 @@ const _ = fp.convert({
   immutable: true,
   rearg: false,
 });
+
 //getter functions
 const getIngredientById = (catelog, id) => {
   return _.get(catelog, ["ingredientsById", id]);
