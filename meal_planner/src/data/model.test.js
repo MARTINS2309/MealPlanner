@@ -693,7 +693,8 @@ describe("model", () => {
     });
   });
   describe("System Consitency", () => {
-    //generating a new state for diff, diffObjects, informationPaths and havePathInCommon functions
+    //generating a new state for diff, diffObjects, informationPaths and havePathInCommon functions and class
+    new m.SystemState();
     m.SystemState.initialise(appData);
 
     const previous = m.SystemState.get();

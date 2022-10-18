@@ -60,10 +60,11 @@ const mealPlanInfo = (catelog, mealPlan) => {
   return mealPlanInfo;
 };
 //search functions
-const searchIngredientsByName = (catelog, name) => {
+const searchIngredientsByName = (catelog, query) => {
   let ingredients = _.get(catelog, "ingredientsById");
+  let queryLowerCase = query.toLowerCase();
   let matchingIngredients = _.filter(ingredients, (ingredient) => {
-    return _.get(ingredient, "name").includes(name);
+    return _.get(ingredient, "name").toLowerCase().includes(queryLowerCase);
   });
   if (matchingIngredients.length === 0) {
     return [];
@@ -159,7 +160,7 @@ const informationPaths = (obj, path = []) => {
   );
 };
 
-//the results of informationPaths has to be spread into _.intersection otherwise its returning empty if the inputs were identical with different references
+//the results of informationPaths has to be spread into _.intersection otherwise it returns false even when the inputs were identical with different references
 const havePathInCommon = (diff1, diff2) => {
   return !_.isEmpty(
     _.intersection(...informationPaths(diff1), ...informationPaths(diff2))
