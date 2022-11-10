@@ -1,4 +1,6 @@
-let appData = {
+import Immutable from "immutable";
+
+let appData = Immutable.fromJS({
   catelogData: {
     ingredientsById: {
       milk: {
@@ -207,6 +209,6 @@ let appData = {
       },
     },
   },
-};
+});
 
 export default appData;

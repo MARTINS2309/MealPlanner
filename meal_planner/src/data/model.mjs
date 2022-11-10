@@ -1,13 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-throw-literal */
-import fp from "lodash/fp.js";
-const _ = fp.convert({
-  cap: false,
-  curry: false,
-  fixed: false,
-  immutable: true,
-  rearg: false,
-});
+//import fp from "mudash/fp";
+import _ from "mudash";
 
 //getter functions
 const getIngredientById = (catelog, id) => {
@@ -27,8 +21,10 @@ const ingredientQuantityInfo = (catelog, recipe) => {
   var ingredientQuantities = _.get(recipe, "ingredientQuantities");
   var ingredientInfo = _.map(ingredientIds, function (ingredientId, index) {
     return {
-      [_.get(catelog, ["ingredientsById", ingredientId, "name"])]:
-        ingredientQuantities[index].quantity,
+      [_.get(catelog, ["ingredientsById", ingredientId, "name"])]: _.get(
+        ingredientQuantities,
+        [index, "quantity"]
+      ),
     };
   });
   return ingredientInfo;

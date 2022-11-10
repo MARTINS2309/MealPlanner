@@ -1,35 +1,50 @@
 /* eslint-disable no-undef */
 const m = require("./model.mjs");
 const appData = require("./data").default;
+const Immutable = require("immutable");
 
 describe("model", () => {
   //catelog variables
-  const ingredientMatch1 = appData.catelogData.ingredientsById.sugar;
-  const ingredientMatch2 = appData.catelogData.ingredientsById.eggs;
+  const ingredientMatch1 = Immutable.getIn(appData, [
+    "catelogData",
+    "ingredientsById",
+    "sugar",
+  ]);
+  const ingredientMatch2 = Immutable.getIn(appData, [
+    "catelogData",
+    "ingredientsById",
+    "eggs",
+  ]);
 
-  const recipeMatch1 = appData.catelogData.recipesById.fryedeggs;
-  const recipeMatch2 = appData.catelogData.recipesById.sweetomlette;
+  const recipeMatch1 = Immutable.getIn(appData, [
+    "catelogData",
+    "recipesById",
+    "fryedeggs",
+  ]);
+  const recipeMatch2 = Immutable.getIn(appData, [
+    "catelogData",
+    "recipesById",
+    "sweetomlette",
+  ]);
 
-  const mealPlanMatch1 = appData.catelogData.mealPlansById.mealplan1;
-  const mealPlanMatch2 = appData.catelogData.mealPlansById.mealplan2;
+  const mealPlanMatch1 = Immutable.getIn(appData, [
+    "catelogData",
+    "mealPlansById",
+    "mealplan1",
+  ]);
+  const mealPlanMatch2 = Immutable.getIn(appData, [
+    "catelogData",
+    "mealPlansById",
+    "mealplan2",
+  ]);
 
-  const recipeInfoMatch1 = m.recipeInfo(
-    appData.catelogData,
-    appData.catelogData.recipesById.fryedeggs
-  );
-  const recipeInfoMatch2 = m.recipeInfo(
-    appData.catelogData,
-    appData.catelogData.recipesById.sweetomlette
-  );
+  const catelogData = Immutable.getIn(appData, ["catelogData"]);
 
-  const mealPlanInfoMatch1 = m.mealPlanInfo(
-    appData.catelogData,
-    appData.catelogData.mealPlansById.mealplan1
-  );
-  const mealPlanInfoMatch2 = m.mealPlanInfo(
-    appData.catelogData,
-    appData.catelogData.mealPlansById.mealplan2
-  );
+  const recipeInfoMatch1 = m.recipeInfo(catelogData, mealPlanMatch1);
+  const recipeInfoMatch2 = m.recipeInfo(catelogData, mealPlanMatch2);
+
+  const mealPlanInfoMatch1 = m.mealPlanInfo(catelogData, mealPlanMatch1);
+  const mealPlanInfoMatch2 = m.mealPlanInfo(catelogData, mealPlanMatch2);
 
   const newIngredient = {
     id: "apple",
@@ -98,9 +113,16 @@ describe("model", () => {
     isBlocked: false,
     currentMealPlanId: "mealplan1",
   };
-  const userMatch1 = appData.userManagementData.usersById["harry@email.com"];
-  const adminMatch1 =
-    appData.userManagementData.adminsById["martins2309@gmail.com"];
+  const userMatch1 = Immutable.getIn(appData, [
+    "userManagementData",
+    "usersById",
+    "harry@email.com",
+  ]);
+  const adminMatch1 = Immutable.getIn(appData, [
+    "userManagementData",
+    "usersById",
+    "martins2309@gmail.com",
+  ]);
 
   describe("getters", () => {
     describe("getIngredientById", () => {
